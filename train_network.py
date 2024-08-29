@@ -1080,7 +1080,7 @@ class NetworkTrainer:
                             raise NotImplementedError("multipliers for each sample is not supported yet")
                         # print(f"set multiplier: {multipliers}")
                         accelerator.unwrap_model(network).set_multiplier(multipliers)
-
+                    text_encoder_conds = None # Initialize the variable to avoid UnboundLocalError
                     text_encoder_outputs_list = batch.get("text_encoder_outputs_list", None)
                     if text_encoder_outputs_list is not None:
                         text_encoder_conds = text_encoder_outputs_list  # List of text encoder outputs
@@ -1111,7 +1111,8 @@ class NetworkTrainer:
                                 )
                                 if args.full_fp16:
                                     encoded_text_encoder_conds = [c.to(weight_dtype) for c in encoded_text_encoder_conds]
-
+                        if text_encoder_conds is None:
+                            text_encoder_conds = [None] * len(encoded_text_encoder_conds)
                         # if encoded_text_encoder_conds is not None, update cached text_encoder_conds
                         for i in range(len(encoded_text_encoder_conds)):
                             if encoded_text_encoder_conds[i] is not None:
